@@ -331,7 +331,7 @@ st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSE PROJECT]")
 Channel_Id = st.text_input(":violet[Enter the Youtube Channel ID]")
 
         
-if st.button("Insert Data and Migrate"):
+if st.button("Collection of Data"):
     Channel_ids=[]
     mydb = client['Youtube_Data']
     Channel=mydb["Channel"]
