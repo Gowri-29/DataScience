@@ -23,14 +23,14 @@ def get_channel_detalis(channel_id):
         id=channel_id)
     response = request.execute()
     for i in response['items']:
-        data = dict(Channel_Name=i["snippet"]["title"],
+        ch_data = dict(Channel_Name=i["snippet"]["title"],
                 Channel_Id=i['id'],
                 Subscription_Count=i['statistics']['subscriberCount'],
                 Channel_Views=i['statistics']['viewCount'],
                 Channel_Description=i['snippet']['description'],
                 Playlist_Id=i['contentDetails']['relatedPlaylists']['uploads'],
                 Total_Video=i['statistics']['videoCount'])
-    return data
+    return ch_data
 
 #getting video :
 def get_videos_ids(channel_id):
@@ -182,22 +182,11 @@ if Channel_data:  # Check if Channel_data list is not empty
 else:
     Channel_DF = pd.DataFrame()  # Create an empty DataFrame if no data is available
 
-myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
-cur = myconnection.cursor()
-drop_query = " drop table if exists Channel"
-cur.execute(drop_query)
-columns = ", ".join(
-    f"{column_name} {dtype}"
-    for column_name, dtype in zip(Channel_DF.columns, Channel_DF.dtypes))
+if not Channel_DF.empty:
+    pass
+else:
+    st.warning("No data available for channels.") 
 
-sql_create_table = f"CREATE TABLE IF NOT EXISTS Channel ({columns});"
-Channel = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
-cur.execute("create table Channel(Channel_Name text,Channel_Id text,Subscription_Count int,Channel_Views int,Channel_Description text, Playlist_Id text, Total_Video int)")
-sql = "insert into Channel values(%s,%s,%s,%s,%s,%s,%s)"
-
-for i in range(0,len(Channel_DF)):
-    cur.execute(sql,tuple(Channel_DF.iloc[i]))
-    myconnection.commit()
 
 #creating playlistDF    
 
@@ -209,23 +198,10 @@ if Playlist_data:  # Check if Playlist_data list is not empty
 else:
     Playlist_DF = pd.DataFrame()  # Create an empty DataFrame if no data is available
 
-myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
-cur = myconnection.cursor()
-drop_query = " drop table if exists Playlist"
-cur.execute(drop_query)
-
-columns = ", ".join(
-    f"{column_name} {dtype}"
-    for column_name, dtype in zip(Playlist_DF.columns, Playlist_DF.dtypes))
-
-sql_create_table = f"CREATE TABLE IF NOT EXISTS Playlist ({columns});"
-Playlist = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
-cur.execute("create table Playlist(Playlist_Id text,Channel_Id text,Title text,Channel_Name text,PublishedAt text, Video_Count int)")
-sql = "insert into Playlist values(%s,%s,%s,%s,%s,%s)"
-
-for i in range(0,len(Playlist_DF)):
-    cur.execute(sql,tuple(Playlist_DF.iloc[i]))
-    myconnection.commit()
+if not Playlist_DF.empty:
+    pass
+else:
+    st.warning("No data available for playlists.")    
 
 
 #creating commentsDF
@@ -238,22 +214,10 @@ if Comments_data:  # Check if Comments_data list is not empty
 else:
     Comments_DF = pd.DataFrame()  # Create an empty DataFrame if no data is available
 
-myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
-cur = myconnection.cursor()
-drop_query = " drop table if exists Comments"
-cur.execute(drop_query)
-columns = ", ".join(
-    f"{column_name} {dtype}"
-    for column_name, dtype in zip(Comments_DF.columns, Comments_DF.dtypes))
-
-sql_create_table = f"CREATE TABLE IF NOT EXISTS Comments ({columns});"
-Comments = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
-cur.execute("create table Comments(Comment_Id text,Video_Id text,Comments text,Comment_Author text,Comment_Published_Date text)")
-sql = "insert into Comments values(%s,%s,%s,%s,%s)"
-
-for i in range(0,len(Comments_DF)):
-    cur.execute(sql,tuple(Comments_DF.iloc[i]))
-    myconnection.commit()
+if not Comments_DF.empty:
+    pass
+else:
+    st.warning("No data available for comments.")
 
 #creating videosDF
 for i in Channel.find({},{'_id':0,"Videos":1}):
@@ -266,32 +230,108 @@ if Videos_data:  # Check if Videos_data list is not empty
 else:
     Videos_DF = pd.DataFrame()  # Create an empty DataFrame if no data is available
 
-myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
-cur = myconnection.cursor()
-drop_query = " drop table if exists Videos"
-cur.execute(drop_query)
+if not Videos_DF.empty:
+    pass
+else:
+    st.warning("No data available for videos.")
 
-columns = ", ".join(
-    f"{column_name} {dtype}"
-    for column_name, dtype in zip(Videos_DF.columns, Videos_DF.dtypes))
 
-sql_create_table = f"CREATE TABLE IF NOT EXISTS Videos ({columns});"
-Videos = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
-cur.execute("create table Videos(Channel_Name text,Channel_Id text,Video_Id text,Title text,Tags text,Description text,Published_Date text,Duration text,Views int,Thumbnail text,Comments int,Likes int,Dislikes int,Favorite_Count int,Definition text,Caption_Status text)")
-sql = "insert into Videos values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+def Creating_Cha_Table_and_Uploading():
+    client = pymongo.MongoClient("mongodb://localhost:27017")
+    mydb = client["Youtube_Data"]
+    myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
+    cur = myconnection.cursor()
+    drop_query = " drop table if exists Channel"
+    cur.execute(drop_query)
+    columns = ", ".join(
+        f"{column_name} {dtype}"
+        for column_name, dtype in zip(Channel_DF.columns, Channel_DF.dtypes))
 
-for i in range(0,len(Videos_DF)):
-    cur.execute(sql,tuple(Videos_DF.iloc[i]))
-    myconnection.commit()
+    sql_create_table = f"CREATE TABLE IF NOT EXISTS Channel ({columns});"
+    Channel = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
+    cur.execute("create table Channel(Channel_Name text,Channel_Id text,Subscription_Count int,Channel_Views int,Channel_Description text, Playlist_Id text, Total_Video int)")
+    sql = "insert into Channel values(%s,%s,%s,%s,%s,%s,%s)"
+
+    for i in range(0,len(Channel_DF)):
+        cur.execute(sql,tuple(Channel_DF.iloc[i]))
+        myconnection.commit()
+
+def Creating_Pla_Table_and_Uploading():
+    client = pymongo.MongoClient("mongodb://localhost:27017")
+    mydb = client["Youtube_Data"]
+    myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
+    cur = myconnection.cursor()
+    drop_query = " drop table if exists Playlist"
+    cur.execute(drop_query)
+
+    columns = ", ".join(
+        f"{column_name} {dtype}"
+        for column_name, dtype in zip(Playlist_DF.columns, Playlist_DF.dtypes))
+
+    sql_create_table = f"CREATE TABLE IF NOT EXISTS Playlist ({columns});"
+    Playlist = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
+    cur.execute("create table Playlist(Playlist_Id text,Channel_Id text,Title text,Channel_Name text,PublishedAt text, Video_Count int)")
+    sql = "insert into Playlist values(%s,%s,%s,%s,%s,%s)"
+
+    for i in range(0,len(Playlist_DF)):
+        cur.execute(sql,tuple(Playlist_DF.iloc[i]))
+        myconnection.commit()
+def Creating_Com_Table_and_Uploading():
+    client = pymongo.MongoClient("mongodb://localhost:27017")
+    mydb = client["Youtube_Data"]
+    myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
+    cur = myconnection.cursor()
+    drop_query = " drop table if exists Comments"
+    cur.execute(drop_query)
+    columns = ", ".join(
+        f"{column_name} {dtype}"
+        for column_name, dtype in zip(Comments_DF.columns, Comments_DF.dtypes))
+
+    sql_create_table = f"CREATE TABLE IF NOT EXISTS Comments ({columns});"
+    Comments = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
+    cur.execute("create table Comments(Comment_Id text,Video_Id text,Comments text,Comment_Author text,Comment_Published_Date text)")
+    sql = "insert into Comments values(%s,%s,%s,%s,%s)"
+
+    for i in range(0,len(Comments_DF)):
+        cur.execute(sql,tuple(Comments_DF.iloc[i]))
+        myconnection.commit()
+
+def Creating_Vid_Table_and_Uploading():
+    client = pymongo.MongoClient("mongodb://localhost:27017")
+    mydb = client["Youtube_Data"]
+    myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
+    cur = myconnection.cursor()
+    drop_query = " drop table if exists Videos"
+    cur.execute(drop_query)
+
+    columns = ", ".join(
+        f"{column_name} {dtype}"
+        for column_name, dtype in zip(Videos_DF.columns, Videos_DF.dtypes))
+
+    sql_create_table = f"CREATE TABLE IF NOT EXISTS Videos ({columns});"
+    Videos = sql_create_table.replace("float64","float").replace("category","text").replace("int64","int")
+    cur.execute("create table Videos(Channel_Name text,Channel_Id text,Video_Id text,Title text,Tags text,Description text,Published_Date text,Duration text,Views int,Thumbnail text,Comments int,Likes int,Dislikes int,Favorite_Count int,Definition text,Caption_Status text)")
+    sql = "insert into Videos values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+
+    for i in range(0,len(Videos_DF)):
+        cur.execute(sql,tuple(Videos_DF.iloc[i]))
+        myconnection.commit()
+
+def Creating_Table_and_Uploading_SQL():
+    Creating_Cha_Table_and_Uploading()
+    Creating_Pla_Table_and_Uploading()
+    Creating_Com_Table_and_Uploading()
+    Creating_Vid_Table_and_Uploading()
 
 
 #steamlit 
 
 st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSE PROJECT]")
-    
-Channel_Id = st.text_input(":violet[Enter the Youtube Channel Id(e.g: UCHE7CG-****************)]")
+        
+Channel_Id = st.text_input(":violet[Enter the Youtube Channel ID]")
 
-if st.button(":green[Extraction and Importing]"):
+        
+if st.button("Insert Data and Migrate"):
     Channel_ids=[]
     mydb = client['Youtube_Data']
     Channel=mydb["Channel"]
@@ -301,15 +341,21 @@ if st.button(":green[Extraction and Importing]"):
     if Channel_Id in Channel_ids:
         st.success("Channel Details already exists")
     else:
-        insert= Channel_input(Channel_Id)
-        st.success("Channel Details uploaded")
+        Channel_input(Channel_Id)
+        st.balloons()
         
+        
+if st.button("Migrate to Sql"):
+    Creating_Table_and_Uploading_SQL()
+    st.balloons()
+
+     
                 
 #SQL CONNECTIONS:
 myconnection = pymysql.connect(host='127.0.0.1',user='root',passwd='gowri@2903',database="Youtube_Data")
 cur = myconnection.cursor()
 
-Show_Table=st.selectbox(":bold[SELECT THE QUESTIONS FOR VIEW]",("1. What are the names of all the videos and their corresponding channels?",
+Show_Table=st.selectbox("SELECT THE QUESTIONS FOR VIEW",("1. What are the names of all the videos and their corresponding channels?",
                                                 "2. Which channels have the most number of videos, and how many videos do they have?",
                                                 "3. What are the top 10 most viewed videos and their respective channels?",
                                                 "4. How many comments were made on each video, and what are their corresponding video names?",
