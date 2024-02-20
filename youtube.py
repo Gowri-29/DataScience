@@ -60,23 +60,23 @@ def get_video_details(Video_Ids):
 
         response = request.execute()
         
-        for item in response['items']:
-            data = dict(Channel_Name=item['snippet']['channelTitle'],
-                        Channel_Id=item['snippet']['channelId'],
-                        Video_Id=item['id'],
-                        Title=item['snippet']['title'],
-                        Tags=item['snippet'].get('tags',None),
-                        Description=item['snippet']['description'],
-                        Published_Date=item['snippet']['publishedAt'],
-                        Duration=item['contentDetails']['duration'],
-                        Views=item['statistics']['viewCount'],
-                        Thumbnail=item['snippet']['thumbnails']['default']['url'],
-                        Comments=item['statistics'].get('commentCount'),
-                        Likes=item['statistics'].get('likeCount', 0),
-                        Dislikes =item['statistics'].get('dislikeCount', 0),
-                        Favorite_Count=item['statistics']['favoriteCount'],
-                        Definition=item['contentDetails']['definition'],
-                        Caption_Status=item['contentDetails']['caption'])
+        for i in response['items']:
+            data = dict(Channel_Name=i['snippet']['channelTitle'],
+                        Channel_Id=i['snippet']['channelId'],
+                        Video_Id=i['id'],
+                        Title=i['snippet']['title'],
+                        Tags=i['snippet'].get('tags',None),
+                        Description=i['snippet']['description'],
+                        Published_Date=i['snippet']['publishedAt'],
+                        Duration=i['contentDetails']['duration'],
+                        Views=i['statistics']['viewCount'],
+                        Thumbnail=i['snippet']['thumbnails']['default']['url'],
+                        Comments=i['statistics'].get('commentCount'),
+                        Likes=i['statistics'].get('likeCount', 0),
+                        Dislikes =i['statistics'].get('dislikeCount', 0),
+                        Favorite_Count=i['statistics']['favoriteCount'],
+                        Definition=i['contentDetails']['definition'],
+                        Caption_Status=i['contentDetails']['caption'])
             
             Video_Data.append(data)
     return Video_Data
@@ -94,12 +94,12 @@ def get_comment_details(Video_Ids):
             
             response=request.execute()
 
-            for item in response['items']:
-                Data=dict(Comment_Id=item['snippet']['topLevelComment']['id'],
-                        Video_Id=item['snippet']['topLevelComment']['snippet']['videoId'],
-                        Comments=item['snippet']['topLevelComment']['snippet']['textOriginal'],
-                        Comment_Author=item['snippet']['topLevelComment']['snippet']['authorDisplayName'],
-                        Comment_Published_Date=item['snippet']['topLevelComment']['snippet']['publishedAt'])  
+            for i in response['items']:
+                Data=dict(Comment_Id=i['snippet']['topLevelComment']['id'],
+                        Video_Id=i['snippet']['topLevelComment']['snippet']['videoId'],
+                        Comments=i['snippet']['topLevelComment']['snippet']['textOriginal'],
+                        Comment_Author=i['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                        Comment_Published_Date=i['snippet']['topLevelComment']['snippet']['publishedAt'])  
                 
                 Comment_data.append(Data)
     except:
@@ -121,14 +121,14 @@ def get_playlists_details(channel):
             )
         response = request.execute()
         
-        for item in response['items']:
+        for i in response['items']:
             Data = dict(
-                    Playlist_Id = item['id'],
-                    Channel_Id = item['snippet']['channelId'],
-                    Title =item['snippet']['title'],
-                    Channel_Name=item['snippet']['channelTitle'],
-                    PublishedAt =item['snippet']['publishedAt'],
-                    Video_Count=item['contentDetails']['itemCount']
+                    Playlist_Id = i['id'],
+                    Channel_Id = i['snippet']['channelId'],
+                    Title =i['snippet']['title'],
+                    Channel_Name=i['snippet']['channelTitle'],
+                    PublishedAt =i['snippet']['publishedAt'],
+                    Video_Count=i['contentDetails']['itemCount']
                 )
             Playlist_Details.append(Data)
         next_page_token=response.get('nextPageToken')
